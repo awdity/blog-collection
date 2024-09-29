@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\BlogController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +14,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Only admins can access these routes
+Route::group(['middleware' => ['role:Admin']], function () {
+    Route::delete('blogs/{id}', [BlogController::class, 'destroy']); // Admin can delete
 });
+
+// Authors and Admins can add and edit posts
+Route::group(['middleware' => ['role:Author|Admin']], function () {
+    Route::post('blogs', [BlogController::class, 'store']); // Create new blog post
+    Route::put('blogs/{id}', [BlogController::class, 'update']); // Edit blog post
+});
+
+//view posts
+Route::get('blogs', [BlogController::class, 'index']);
